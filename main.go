@@ -3,19 +3,18 @@ package main
 import (
 	"fmt"
 	"log"
-	"net"
 	"net/http"
 )
 
-var host = "localhost"
-var port = "3000"
+var host = "0.0.0.0"
+var port = "8080"
 
 func main() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", index)
 
 	fmt.Printf("start: http://%s", host+":"+port)
-	log.Fatal(http.ListenAndServe(net.JoinHostPort(host, port), mux))
+	log.Fatal(http.ListenAndServe(":"+port, mux))
 }
 
 func index(w http.ResponseWriter, r *http.Request) {

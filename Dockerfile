@@ -1,15 +1,13 @@
-FROM golang:1.17-alpine as builder
+FROM golang:1.17-alpine as build
 
 WORKDIR /app
-COPY go.mode .
-COPY go.sum .
+COPY go.mod go.mod
+#COPY go.sum go.sum
 RUN go mod download
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /main /main.go
+RUN go build -o /docker-gs-go
 
-ENV PORT 8000
+EXPOSE 8080
 
-FROM alpine:3
-COPY --from=builder main /bin/main
-ENTRYPOINT ["/bin/main"]
+ENTRYPOINT ["/docker-gs-go"]
