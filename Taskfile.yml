@@ -1,0 +1,36 @@
+version: '3'
+
+env:
+  PROJECT: github.com/wubba-com/go-k8s
+  APP: docker_gs_go
+  PORT: 4500
+  RELEASE: 0.0.1
+  COMMIT: $(shell git rev-parse --short HEAD)
+  BUILD_TIME: $(shell date -u '+%Y-%m-%d_%H:%M:%S')
+  CONTAINER_IMAGE: docker.io/devise3000/${APP}
+  GOOS: linux
+  GOARCH: amd64
+
+tasks:
+  build:
+    cmds:w
+      - docker build -t $CONTAINER_IMAGE:$RELEASE .
+  run:
+    deps: [build]
+    cmds:
+      - docker stop $APP:$RELEASE || true && docker rm $APP:$RELEASE || true
+      - docker run --name $APP -p 80:$PORT --rm -e "PORT=$PORT" $APP:$RELEASE
+  push:
+    deps: [build]
+    cmds:
+      - docker push $CONTAINER_IMAGE:$RELEASE
+  minikube:
+    cmds:
+      - |
+        {{range $i, $line := find ./k8s -type f -name "*.yaml"}}
+          cat $$t | \
+            gsed -E "s/\{\{(\s*)\.Release(\s*)\}\}/$RELEASE/g" | \
+            gsed -E "s/\{\{(\s*)\.ServiceName(\s*)\}\}/$APP/g"; \
+          echo ---; \
+        {{end}}EOF
+      - kubectl apply -f tmp.yaml

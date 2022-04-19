@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-as-service-app
+  labels:
+    env: prod
+    owner: SergeyIlyin
+spec:
+  selector:
+    project: cia # Selecting pods with labels
+  ports:
+    - name: app-listener
+      protocol: TCP
+      port: 80
+      targetPort: 4500
+  type: LoadBalancer

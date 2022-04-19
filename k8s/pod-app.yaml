@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-app
+  labels:
+    env: prod
+    app: main
+    tier: frontend
+    owner: SergeyIlyin
+spec:
+  containers:
+    - name: container-app
+      image: devise3000/docker_gs_go:0.0.1
+      ports:
+        - containerPort: 4500

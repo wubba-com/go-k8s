@@ -1,36 +1,30 @@
 PROJECT?=github.com/wubba-com/go-k8s
-APP?=testK8s
-PORT?=3000
+APP?=docker_gs_go
+PORT?=4500
 
 RELEASE?=0.0.1
 COMMIT?=$(shell git rev-parse --short HEAD)
 BUILD_TIME?=$(shell date -u '+%Y-%m-%d_%H:%M:%S')
-CONTAINER_IMAGE?=docker.io/devise3000/${APP}
+CONTAINER_IMAGE?=devise3000/${APP}
 
 GOOS?=linux
 GOARCH?=amd64
 
 clean:
-	rm -f ${APP}
+	docker rm -f ${APP}
 
-build: clean
-	CGO_ENABLED=0 GOOS=${GOOS} GOARCH=${GOARCH} go build \
-		-ldflags "-s -w -X ${PROJECT}/version.Release=${RELEASE} \
-		-X ${PROJECT}/version.Commit=${COMMIT} -X ${PROJECT}/version.BuildTime=${BUILD_TIME}" \
-		-o ${APP}
-
-container: build
+build:
 	docker build -t $(CONTAINER_IMAGE):$(RELEASE) .
 
-run: container
+run: build
 	docker stop $(APP):$(RELEASE) || true && docker rm $(APP):$(RELEASE) || true
-	docker run --name ${APP} -p ${PORT}:${PORT} --rm -e "PORT=${PORT}" $(APP):$(RELEASE)
+	docker run --name ${APP} -p 80:${PORT} --rm $(CONTAINER_IMAGE):$(RELEASE)
 
-test:
-	go test -v -race ./...
-
-push: container
+push: build
 	docker push $(CONTAINER_IMAGE):$(RELEASE)
+
+stop:
+	docker stop $(APP)
 
 minikube: push
 	for t in $(shell find ./kubernetes -type f -name "*.yaml"); do \

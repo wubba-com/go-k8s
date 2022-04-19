@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+# в методанных описываются как должен наз-ся наш деплой и лейблы (очень важны, всегда заполнять)
+metadata:
+  name: app-k8s-deployment-as
+  labels:
+    app: my-k8s-app
+    env: prod
+    owner: SergeyIlyin
+# с какими pods (подами деплоймент будет работать)
+spec:
+  #replicas: 3
+# будет работать с теми которые описаны в selector, project: kgb заполнить нужно metadata -> labels -> project: kgb
+  selector:
+    matchLabels:
+      project: cia
+# template - описываем как будет выглядеть наш "под"
+  template:
+    metadata:
+      labels:
+        project: cia # Service will look for those PODS Labels!!
+    spec:
+      containers:
+        - name: web-app
+          # devise3000/docker_gs_go:0.0.1
+          image: devise3000/docker_gs_go:0.0.1
+          ports:
+            - containerPort: 4500
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: my-auscaling
+spec:
+  minReplicas: 2
+  maxReplicas: 4
+  scaleTargetRef:
+    kind: Deployment
+    name: app-k8s-deployment-as
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: 80

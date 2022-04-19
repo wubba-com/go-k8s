@@ -4,10 +4,8 @@ WORKDIR /app
 COPY go.mod go.mod
 #COPY go.sum go.sum
 RUN go mod download
-COPY . .
+COPY ./ ./
 
-RUN go build -o /docker-gs-go
+RUN go build -o main main.go
 
-EXPOSE 8080
-
-ENTRYPOINT ["/docker-gs-go"]
+CMD ["./main"]
